@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>iPhone 17 Wallpaper Mockup</title>
+<style>
+:root{
+  --bg:#f3f1ee; --panel:#ffffff; --ink:#1d1c1a; --mute:#6f6b66; --line:#dcd8d2; --accent:#2b5cff;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#16171a; --panel:#202226; --ink:#f1efec; --mute:#9a9690; --line:#33363b; --accent:#6f95ff; }
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 "Avenir Next","Segoe UI",system-ui,sans-serif;min-height:100vh}
+.app{display:grid;grid-template-columns:340px 1fr;gap:28px;max-width:1100px;margin:0 auto;padding:28px 20px}
+@media (max-width:820px){.app{grid-template-columns:1fr}}
+h1{font-size:22px;margin:0 0 4px;letter-spacing:-.01em}
+.sub{color:var(--mute);margin:0 0 20px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:18px;align-self:start}
+.drop{border:2px dashed var(--line);border-radius:12px;padding:22px 14px;text-align:center;cursor:pointer;color:var(--mute);transition:border-color .15s,background .15s}
+.drop.over,.drop:hover{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 7%,transparent)}
+.drop b{display:block;color:var(--ink);margin-bottom:2px}
+label.f{display:flex;flex-direction:column;gap:8px;font-weight:600}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.sw{width:34px;height:34px;border-radius:50%;border:2px solid var(--line);cursor:pointer;padding:0}
+.sw[aria-pressed="true"]{outline:3px solid var(--accent);outline-offset:2px}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{flex:1;padding:9px 6px;border:0;background:transparent;color:var(--ink);font:inherit;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
+input[type=range]{width:100%;accent-color:var(--accent)}
+input[type=color]{width:44px;height:34px;border:1px solid var(--line);border-radius:8px;background:none;padding:2px}
+.chk{display:flex;align-items:center;gap:10px;font-weight:600}
+.chk input{width:18px;height:18px;accent-color:var(--accent)}
+.btn{background:var(--accent);color:#fff;border:0;border-radius:11px;padding:13px;font-size:16px;font-weight:600;font-family:inherit;cursor:pointer}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.stage{display:flex;justify-content:center;align-items:flex-start}
+.stage .wrap{border-radius:16px;padding:10px;background:
+  conic-gradient(#0000 25%,#8882 0 50%,#0000 0 75%,#8882 0) 0 0/20px 20px}
+canvas{display:block;max-width:100%;height:auto;max-height:84vh;width:auto}
+.hint{color:var(--mute);font-size:13px;margin:0}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="panel">
+    <div>
+      <h1>iPhone 17 wallpaper mockup</h1>
+      <p class="sub">Drop in a wallpaper, style the phone, download a PNG for your posts.</p>
+    </div>
+
+    <div class="drop" id="drop" tabindex="0" role="button" aria-label="Upload wallpaper">
+      <b id="dropTitle">Upload wallpaper</b>
+      <span>Tap or drop an image here</span>
+      <input type="file" id="file" accept="image/*" hidden>
+    </div>
+
+    <label class="f">Zoom
+      <input type="range" id="zoom" min="1" max="3" step="0.01" value="1">
+    </label>
+    <label class="f">Move image up / down
+      <input type="range" id="panY" min="-1" max="1" step="0.01" value="0">
+    </label>
+    <label class="f">Move image left / right
+      <input type="range" id="panX" min="-1" max="1" step="0.01" value="0">
+    </label>
+
+    <div class="f" style="display:flex;flex-direction:column;gap:8px;font-weight:600">Phone color
+      <div class="row" id="colors"></div>
+    </div>
+
+    <div class="f" style="display:flex;flex-direction:column;gap:8px;font-weight:600">Screen
+      <div class="seg" id="mode">
+        <button data-m="clean" aria-pressed="true">Wallpaper only</button>
+        <button data-m="lock" aria-pressed="false">Lock screen</button>
+      </div>
+    </div>
+
+    <div class="row" style="align-items:center">
+      <label class="f" style="flex:1">Lock screen time
+        <input type="text" id="tTime" value="21:34" maxlength="5" style="padding:9px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--ink);font:inherit">
+      </label>
+      <label class="f" style="flex:1.4">Lock screen date
+        <input type="text" id="tDate" value="Sun 25 Oct" maxlength="14" style="padding:9px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--ink);font:inherit">
+      </label>
+    </div>
+
+    <div class="f" style="display:flex;flex-direction:column;gap:8px;font-weight:600">Background
+      <div class="seg" id="bgmode">
+        <button data-b="transparent" aria-pressed="true">Transparent</button>
+        <button data-b="solid" aria-pressed="false">Color</button>
+      </div>
+      <div class="row" id="bgrow" style="display:none;align-items:center">
+        <input type="color" id="bgcolor" value="#e9e5df" aria-label="Background color">
+        <span class="hint">Behind the phone</span>
+      </div>
+    </div>
+
+    <div class="f" style="display:flex;flex-direction:column;gap:8px;font-weight:600">Export size
+      <div class="seg" id="scale">
+        <button data-s="0.5" aria-pressed="false">Small</button>
+        <button data-s="0.75" aria-pressed="true">Medium</button>
+        <button data-s="1" aria-pressed="false">Full</button>
+      </div>
+    </div>
+
+    <button class="btn" id="dl" disabled>Download PNG</button>
+    <p class="hint">Everything runs in your browser. Your image is never uploaded.</p>
+  </div>
+
+  <div class="stage"><div class="wrap"><canvas id="cv"></canvas></div></div>
+</div>
+
+<script>
+(function(){
+  // Native size (px). Screen matches iPhone 17: 1206 x 2622.
+  var SW=1206, SH=2622, BEZ=34, FR=14, PAD=130;
+  var BW=SW+2*(BEZ+FR), BH=SH+2*(BEZ+FR);
+  var W=BW+2*PAD, H=BH+2*PAD;
+  var cv=document.getElementById('cv'), ctx=cv.getContext('2d');
+  cv.width=W; cv.height=H;
+
+  var COLORS=[
+    {n:'Black',a:'#2a2b2e',b:'#0e0e10'},
+    {n:'White',a:'#f6f5f2',b:'#c9c7c2'},
+    {n:'Mist Blue',a:'#b9c9da',b:'#8399b0'},
+    {n:'Sage',a:'#b5c0a6',b:'#7f8c70'},
+    {n:'Lavender',a:'#cfc5df',b:'#9d90b5'},
+    {n:'Cosmic Orange',a:'#f08a4b',b:'#c2561f'}
+  ];
+  var st={time:'21:34',date:'Sun 25 Oct',img:null,color:0,mode:'clean',bg:'transparent',bgc:'#e9e5df',zoom:1,px:0,py:0,scale:.75};
+
+  function rr(x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    if(st.bg==='solid'){ctx.fillStyle=st.bgc;ctx.fillRect(0,0,W,H);}
+    var c=COLORS[st.color], bx=PAD, by=PAD, R=200;
+
+    // soft shadow
+    ctx.save();
+    ctx.shadowColor='rgba(0,0,0,.35)';ctx.shadowBlur=90;ctx.shadowOffsetY=40;
+    ctx.fillStyle=c.b;rr(bx,by,BW,BH,R);ctx.fill();ctx.restore();
+
+    // side buttons
+    ctx.fillStyle=c.b;
+    var btn=function(x,y,w,h){rr(x,y,w,h,8);ctx.fill();};
+    btn(bx-9,by+330,12,96);          // action button
+    btn(bx-9,by+500,12,170);         // volume up
+    btn(bx-9,by+710,12,170);         // volume down
+    btn(bx+BW-3,by+620,12,240);      // power
+    btn(bx+BW-3,by+1120,12,110);     // camera control
+
+    // frame
+    var g=ctx.createLinearGradient(bx,by,bx+BW,by+BH);
+    g.addColorStop(0,c.a);g.addColorStop(.5,c.b);g.addColorStop(1,c.a);
+    ctx.fillStyle=g;rr(bx,by,BW,BH,R);ctx.fill();
+    ctx.lineWidth=3;ctx.strokeStyle='rgba(255,255,255,.35)';rr(bx+2,by+2,BW-4,BH-4,R-2);ctx.stroke();
+
+    // black bezel
+    ctx.fillStyle='#050506';rr(bx+FR,by+FR,BW-2*FR,BH-2*FR,R-FR);ctx.fill();
+
+    // screen
+    var sx=bx+FR+BEZ, sy=by+FR+BEZ, sr=R-FR-BEZ+10;
+    ctx.save();rr(sx,sy,SW,SH,sr);ctx.clip();
+    ctx.fillStyle='#111';ctx.fillRect(sx,sy,SW,SH);
+    if(st.img){
+      var iw=st.img.naturalWidth, ih=st.img.naturalHeight;
+      var s=Math.max(SW/iw,SH/ih)*st.zoom, dw=iw*s, dh=ih*s;
+      var ox=(dw-SW)/2*st.px, oy=(dh-SH)/2*st.py;
+      ctx.drawImage(st.img,sx-(dw-SW)/2-ox,sy-(dh-SH)/2-oy,dw,dh);
+    }else{
+      var pg=ctx.createLinearGradient(sx,sy,sx+SW,sy+SH);
+      pg.addColorStop(0,'#2d3142');pg.addColorStop(1,'#bfc0c0');
+      ctx.fillStyle=pg;ctx.fillRect(sx,sy,SW,SH);
+      ctx.fillStyle='rgba(255,255,255,.85)';ctx.textAlign='center';
+      ctx.font='600 56px "Avenir Next","Segoe UI",system-ui,sans-serif';
+      ctx.fillText('Upload your wallpaper',sx+SW/2,sy+SH/2);
+    }
+
+    if(st.mode==='lock'){
+      var F='"SF Pro Display","Avenir Next","Segoe UI",system-ui,sans-serif';
+      var FR2='"SF Pro Rounded",ui-rounded,"Arial Rounded MT Bold","Avenir Next Rounded",system-ui,sans-serif';
+      var cx0=sx+SW/2;
+      ctx.fillStyle='#fff';ctx.strokeStyle='#fff';
+
+      // signal bars
+      for(var i=0;i<4;i++){var bh=14+i*8;rr(sx+825+i*20,sy+98-bh,13,bh,5);ctx.fill();}
+      // carrier name (left of the dynamic island)
+      ctx.textAlign='left';ctx.font='700 50px '+F;
+      ctx.fillText('Michael',sx+110,sy+98);
+      // wifi: centered between signal bars (end x=903) and battery (start x=997)
+      var wx=sx+950;
+      ctx.lineCap='round';ctx.lineWidth=8;
+      [22,40].forEach(function(r){ctx.beginPath();ctx.arc(wx,sy+98,r,Math.PI*1.25,Math.PI*1.75);ctx.stroke();});
+      ctx.beginPath();ctx.arc(wx,sy+93,7,0,7);ctx.fill();
+      // battery with number
+      var bx0=sx+997,by0=sy+58;
+      ctx.globalAlpha=.4;rr(bx0,by0,88,42,13);ctx.fill();
+      ctx.fillRect(bx0+91,by0+14,5,14);ctx.globalAlpha=1;
+      ctx.save();rr(bx0,by0,88,42,13);ctx.clip();ctx.fillRect(bx0,by0,44,42);ctx.restore();
+      ctx.fillStyle='#1c1c1e';ctx.textAlign='center';ctx.font='700 38px '+F;
+      ctx.fillText('23',bx0+44,by0+32);
+
+      // date
+      ctx.fillStyle='#fff';ctx.font='700 60px '+F;
+      ctx.fillText(st.date,cx0,sy+272);
+
+      // glass clock
+      var fs=360;ctx.font='800 '+fs+'px '+FR2;
+      var tw=ctx.measureText(st.time).width;
+      fs=Math.min(380,fs*885/tw);ctx.font='800 '+fs+'px '+FR2;
+      var cg=ctx.createLinearGradient(0,sy+300,0,sy+580);
+      cg.addColorStop(0,'rgba(255,255,255,.46)');cg.addColorStop(1,'rgba(255,255,255,.2)');
+      ctx.save();ctx.shadowColor='rgba(0,0,0,.28)';ctx.shadowBlur=36;
+      ctx.fillStyle=cg;ctx.fillText(st.time,cx0,sy+575);ctx.restore();
+      ctx.lineJoin='round';ctx.lineWidth=3;ctx.strokeStyle='rgba(255,255,255,.4)';
+      ctx.strokeText(st.time,cx0,sy+575);
+
+      // bottom: flashlight + camera + notifications
+      var cy=sy+SH-240, tx=sx+235, kx=sx+SW-235;
+      [tx,kx].forEach(function(x){
+        ctx.fillStyle='rgba(24,24,26,.62)';ctx.beginPath();ctx.arc(x,cy,80,0,7);ctx.fill();
+        ctx.lineWidth=3;ctx.strokeStyle='rgba(255,255,255,.14)';ctx.stroke();
+      });
+      ctx.fillStyle='#fff';
+      rr(tx-23,cy-50,46,16,5);ctx.fill();
+      ctx.beginPath();ctx.moveTo(tx-20,cy-34);ctx.lineTo(tx+20,cy-34);ctx.lineTo(tx+14,cy-16);ctx.lineTo(tx-14,cy-16);ctx.closePath();ctx.fill();
+      rr(tx-17,cy-16,34,68,13);ctx.fill();
+      ctx.fillStyle='#1c1c1e';rr(tx-5,cy+2,10,22,5);ctx.fill();
+      ctx.fillStyle='#fff';rr(kx-40,cy-24,80,60,13);ctx.fill();
+      rr(kx-34,cy-35,26,14,5);ctx.fill();
+      ctx.fillStyle='#1c1c1e';ctx.beginPath();ctx.arc(kx,cy+6,21,0,7);ctx.fill();
+      ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(kx,cy+6,13,0,7);ctx.fill();
+      ctx.fillStyle='#1c1c1e';ctx.beginPath();ctx.arc(kx+28,cy-10,4,0,7);ctx.fill();
+
+      ctx.fillStyle='#fff';ctx.font='600 50px '+F;ctx.textAlign='left';
+      var lbl='4 Notifications', lw=ctx.measureText(lbl).width, tot=34+18+lw, x0=cx0-tot/2;
+      ctx.beginPath();ctx.arc(x0+17,cy,17,0,7);ctx.fill();
+      ctx.fillText(lbl,x0+52,cy+18);
+      ctx.textAlign='center';
+    }
+
+    // dynamic island
+    ctx.fillStyle='#000';rr(sx+SW/2-189,sy+33,378,111,56);ctx.fill();
+    ctx.fillStyle='#10131c';ctx.beginPath();ctx.arc(sx+SW/2+120,sy+88,22,0,7);ctx.fill();
+    ctx.fillStyle='#1b2236';ctx.beginPath();ctx.arc(sx+SW/2+120,sy+88,10,0,7);ctx.fill();
+
+    // home indicator
+    ctx.fillStyle='rgba(255,255,255,.92)';rr(sx+SW/2-210,sy+SH-40,420,16,8);ctx.fill();
+
+    // screen glass edge
+    ctx.restore();
+    ctx.lineWidth=4;ctx.strokeStyle='rgba(255,255,255,.08)';rr(sx,sy,SW,SH,sr);ctx.stroke();
+  }
+
+  function dateStr(){
+    return new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  }
+
+  // controls
+  var $=function(id){return document.getElementById(id)};
+  var drop=$('drop'), file=$('file');
+  function load(f){
+    if(!f)return;
+    var title=$('dropTitle');
+    var rd=new FileReader();
+    rd.onerror=function(){title.textContent='Could not read that file';};
+    rd.onload=function(){
+      var im=new Image();
+      im.onload=function(){
+        st.img=im;$('dl').disabled=false;title.textContent='Change wallpaper';draw();
+      };
+      im.onerror=function(){
+        title.textContent='Unsupported image. Use PNG, JPG or WebP.';
+      };
+      im.src=rd.result;
+    };
+    rd.readAsDataURL(f);
+  }
+  drop.onclick=function(){file.click()};
+  drop.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();file.click();}};
+  file.onchange=function(){load(file.files[0]);file.value='';};
+  ['dragenter','dragover'].forEach(function(t){drop.addEventListener(t,function(e){e.preventDefault();drop.classList.add('over')})});
+  ['dragleave','drop'].forEach(function(t){drop.addEventListener(t,function(e){e.preventDefault();drop.classList.remove('over')})});
+  drop.addEventListener('drop',function(e){load(e.dataTransfer.files[0])});
+
+  ['zoom','panX','panY'].forEach(function(id){
+    $(id).oninput=function(){st.zoom=+$('zoom').value;st.px=+$('panX').value;st.py=+$('panY').value;draw();};
+  });
+
+  var cwrap=$('colors');
+  COLORS.forEach(function(c,i){
+    var b=document.createElement('button');b.className='sw';b.title=c.n;b.setAttribute('aria-label',c.n);
+    b.style.background='linear-gradient(135deg,'+c.a+','+c.b+')';
+    b.setAttribute('aria-pressed',i===0);
+    b.onclick=function(){st.color=i;[].forEach.call(cwrap.children,function(x,j){x.setAttribute('aria-pressed',j===i)});draw();};
+    cwrap.appendChild(b);
+  });
+
+  function seg(id,attr,fn){
+    [].forEach.call($(id).children,function(b){
+      b.onclick=function(){
+        [].forEach.call($(id).children,function(x){x.setAttribute('aria-pressed',x===b)});
+        fn(b.dataset[attr]);draw();
+      };
+    });
+  }
+  seg('mode','m',function(v){st.mode=v});
+  seg('bgmode','b',function(v){st.bg=v;$('bgrow').style.display=v==='solid'?'flex':'none';});
+  seg('scale','s',function(v){st.scale=+v});
+  $('tTime').oninput=function(){st.time=this.value||' ';draw();};
+  $('tDate').oninput=function(){st.date=this.value;draw();};
+  $('bgcolor').oninput=function(){st.bgc=this.value;draw();};
+
+  $('dl').onclick=function(){
+    var s=st.scale, out=document.createElement('canvas');
+    out.width=Math.round(W*s);out.height=Math.round(H*s);
+    var o=out.getContext('2d');o.imageSmoothingQuality='high';o.drawImage(cv,0,0,out.width,out.height);
+    out.toBlob(function(blob){
+      var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+      a.download='iphone17-mockup.png';document.body.appendChild(a);a.click();
+      setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1000);
+    },'image/png');
+  };
+
+  draw();
+})();
+</script>
+</body>
+</html>
