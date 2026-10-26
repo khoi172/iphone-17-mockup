@@ -87,6 +87,13 @@ canvas{display:block;max-width:100%;height:auto;max-height:84vh;width:auto}
       </label>
     </div>
 
+    <label class="f">Clock: glass to solid
+      <input type="range" id="clk" min="0" max="1" step="0.01" value="0">
+    </label>
+    <label class="f">Battery level: <span id="battv">23</span>%
+      <input type="range" id="batt" min="1" max="100" step="1" value="23">
+    </label>
+
     <div class="f" style="display:flex;flex-direction:column;gap:8px;font-weight:600">Background
       <div class="seg" id="bgmode">
         <button data-b="transparent" aria-pressed="true">Transparent</button>
@@ -130,7 +137,7 @@ canvas{display:block;max-width:100%;height:auto;max-height:84vh;width:auto}
     {n:'Lavender',a:'#cfc5df',b:'#9d90b5'},
     {n:'Cosmic Orange',a:'#f08a4b',b:'#c2561f'}
   ];
-  var st={time:'21:34',date:'Sun 25 Oct',img:null,color:0,mode:'clean',bg:'transparent',bgc:'#e9e5df',zoom:1,px:0,py:0,scale:.75};
+  var st={clock:0,batt:23,time:'21:34',date:'Sun 25 Oct',img:null,color:0,mode:'clean',bg:'transparent',bgc:'#e9e5df',zoom:1,px:0,py:0,scale:.75};
 
   function rr(x,y,w,h,r){
     ctx.beginPath();
@@ -204,24 +211,51 @@ canvas{display:block;max-width:100%;height:auto;max-height:84vh;width:auto}
       var bx0=sx+997,by0=sy+58;
       ctx.globalAlpha=.4;rr(bx0,by0,88,42,13);ctx.fill();
       ctx.fillRect(bx0+91,by0+14,5,14);ctx.globalAlpha=1;
-      ctx.save();rr(bx0,by0,88,42,13);ctx.clip();ctx.fillRect(bx0,by0,44,42);ctx.restore();
+      ctx.save();rr(bx0,by0,88,42,13);ctx.clip();ctx.fillRect(bx0,by0,88*st.batt/100,42);ctx.restore();
       ctx.fillStyle='#1c1c1e';ctx.textAlign='center';ctx.font='700 38px '+F;
-      ctx.fillText('23',bx0+44,by0+32);
+      ctx.fillText(String(st.batt),bx0+44,by0+32);
 
       // date
       ctx.fillStyle='#fff';ctx.font='700 60px '+F;
       ctx.fillText(st.date,cx0,sy+272);
 
-      // glass clock
+      // glass clock (see-through: shows a frosted copy of the wallpaper inside the digits)
       var fs=360;ctx.font='800 '+fs+'px '+FR2;
       var tw=ctx.measureText(st.time).width;
       fs=Math.min(380,fs*885/tw);ctx.font='800 '+fs+'px '+FR2;
-      var cg=ctx.createLinearGradient(0,sy+300,0,sy+580);
-      cg.addColorStop(0,'rgba(255,255,255,.46)');cg.addColorStop(1,'rgba(255,255,255,.2)');
-      ctx.save();ctx.shadowColor='rgba(0,0,0,.28)';ctx.shadowBlur=36;
-      ctx.fillStyle=cg;ctx.fillText(st.time,cx0,sy+575);ctx.restore();
-      ctx.lineJoin='round';ctx.lineWidth=3;ctx.strokeStyle='rgba(255,255,255,.4)';
-      ctx.strokeText(st.time,cx0,sy+575);
+      var v=st.clock, rx=sx, ry=sy+290, rw=SW, rh=330, base=sy+575;
+      var mk=function(){var c=document.createElement('canvas');c.width=rw;c.height=rh;return c;};
+      // 1) text mask
+      var mask=mk(), mc=mask.getContext('2d');
+      mc.font=ctx.font;mc.textAlign='center';mc.fillStyle='#000';
+      mc.fillText(st.time,cx0-rx,base-ry);
+      // 2) outer soft shadow only (nothing inside the letters)
+      var sh=mk(), shc=sh.getContext('2d');
+      shc.shadowColor='rgba(0,0,0,'+(.32*(1-.6*v))+')';shc.shadowBlur=44;shc.shadowOffsetY=12;
+      shc.drawImage(mask,0,0);
+      shc.shadowColor='transparent';shc.globalCompositeOperation='destination-out';shc.drawImage(mask,0,0);
+      ctx.drawImage(sh,rx,ry);
+      // 3) frosted wallpaper inside the digits (blur by shrinking then enlarging)
+      var sm=document.createElement('canvas');sm.width=Math.round(rw/16);sm.height=Math.round(rh/16);
+      var sc=sm.getContext('2d');sc.imageSmoothingQuality='high';
+      sc.drawImage(cv,rx,ry,rw,rh,0,0,sm.width,sm.height);
+      var glass=mk(), gc=glass.getContext('2d');
+      gc.imageSmoothingEnabled=true;gc.imageSmoothingQuality='high';
+      gc.drawImage(sm,0,0,rw,rh);
+      var tg=gc.createLinearGradient(0,base-ry-260,0,base-ry);
+      tg.addColorStop(0,'rgba(255,255,255,'+(.34+.66*v)+')');
+      tg.addColorStop(1,'rgba(255,255,255,'+(.10+.90*v)+')');
+      gc.fillStyle=tg;gc.fillRect(0,0,rw,rh);
+      gc.globalCompositeOperation='destination-in';gc.drawImage(mask,0,0);
+      ctx.drawImage(glass,rx,ry);
+      // 4) glass rim: bright top-left edge, softer bottom-right edge
+      ctx.lineJoin='round';
+      var rg=ctx.createLinearGradient(sx+150,sy+320,sx+SW-150,base);
+      rg.addColorStop(0,'rgba(255,255,255,'+(.9*(1-v))+')');
+      rg.addColorStop(.5,'rgba(255,255,255,'+(.35*(1-v))+')');
+      rg.addColorStop(1,'rgba(255,255,255,'+(.7*(1-v))+')');
+      ctx.lineWidth=4;ctx.strokeStyle=rg;
+      ctx.strokeText(st.time,cx0,base);
 
       // bottom: flashlight + camera + notifications
       var cy=sy+SH-240, tx=sx+235, kx=sx+SW-235;
@@ -317,6 +351,8 @@ canvas{display:block;max-width:100%;height:auto;max-height:84vh;width:auto}
   seg('scale','s',function(v){st.scale=+v});
   $('tTime').oninput=function(){st.time=this.value||' ';draw();};
   $('tDate').oninput=function(){st.date=this.value;draw();};
+  $('clk').oninput=function(){st.clock=+this.value;draw();};
+  $('batt').oninput=function(){st.batt=+this.value;$('battv').textContent=this.value;draw();};
   $('bgcolor').oninput=function(){st.bgc=this.value;draw();};
 
   $('dl').onclick=function(){
